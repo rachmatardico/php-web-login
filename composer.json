@@ -1,0 +1,27 @@
+{
+    "name": "matt/php-web-login",
+    "description": "PHP login Management",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Matt\\Php\\Web\\Login\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matt\\Php\\Web\\Login\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rachmat Ardico Perdana",
+            "email": "rahmatardiko99@gmail.com"
+        }
+    ],
+    "require": {
+        "php" : ">=8"
+    }, 
+    "require-dev": {
+        "phpunit/phpunit": "9.5.8"
+    }
+}
