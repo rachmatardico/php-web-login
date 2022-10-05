@@ -5,6 +5,7 @@ namespace Matt\Php\Web\Login\Controller;
 use Matt\Php\Web\Login\App\View;
 use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Exception\ValidationException;
+use Matt\Php\Web\Login\Model\UserLoginRequest;
 use Matt\Php\Web\Login\Model\UserRegisterRequest;
 use Matt\Php\Web\Login\Repository\UserRepository;
 use Matt\Php\Web\Login\Service\UserService;
@@ -40,6 +41,30 @@ class UserController
         } catch (ValidationException $exception) {
             View::render('User/register', [
                 "title" => "Register new User",
+                "error" => $exception->getMessage()
+            ]);
+        }
+    }
+
+    public function login()
+    {
+        View::render('User/login', [
+            "title" => "Login user"
+        ]);
+    }
+
+    public function postLogin()
+    {
+        $request = new UserLoginRequest();
+        $request->id = $_POST['id'];
+        $request->password = $_POST['password'];
+
+        try{
+            $this->userService->login($request);
+            View::redirect('/');
+        }catch(ValidationException $exception){
+            View::render('User/login', [
+                "title" => "Login user",
                 "error" => $exception->getMessage()
             ]);
         }
