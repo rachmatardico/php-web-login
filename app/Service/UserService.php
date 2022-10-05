@@ -6,7 +6,7 @@ use Exception;
 use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Domain\User;
 use Matt\Php\Web\Login\Exception\ValidationException;
-use Matt\Php\Web\Login\Model\{UserRegisterRequest, UserRegisterResponse};
+use Matt\Php\Web\Login\Model\{UserLoginRequest, UserLoginResponse, UserRegisterRequest, UserRegisterResponse};
 use Matt\Php\Web\Login\Repository\UserRepository;
 
 class UserService
@@ -51,6 +51,32 @@ class UserService
         if ($request->id == null || $request->name == null || $request->password == null || 
             trim($request->id) == "" || trim($request->name) == "" || trim($request->password == "")) {
                 throw new ValidationException("Id, Name, Password can't be blank!");
+        }
+    }
+
+    public function login(UserLoginRequest $request): UserLoginResponse
+    {
+        $this->validateUserLoginRequest($request);
+
+        $user = $this->userRepository->findById($request->id);
+        if ($user == null) {
+            throw new ValidationException("Id or Password is wrong");
+        }
+
+        if (password_verify($request->password, $user->password)) {
+            $response = new UserLoginResponse();
+            $response->user = $user;
+            return $response;
+        }else {
+            throw new ValidationException("Id or Password is wrong");
+        }
+    }
+
+    private function validateUserLoginRequest(UserLoginRequest $request)
+    {
+        if ($request->id == null || $request->password == null || 
+            trim($request->id) == "" || trim($request->password == "")) {
+                throw new ValidationException("Id, Password can't be blank!");
         }
     }
 }
