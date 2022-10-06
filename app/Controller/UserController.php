@@ -7,18 +7,24 @@ use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Exception\ValidationException;
 use Matt\Php\Web\Login\Model\UserLoginRequest;
 use Matt\Php\Web\Login\Model\UserRegisterRequest;
+use Matt\Php\Web\Login\Repository\SessionRepository;
 use Matt\Php\Web\Login\Repository\UserRepository;
+use Matt\Php\Web\Login\Service\SessionService;
 use Matt\Php\Web\Login\Service\UserService;
 
 class UserController
 {
     private UserService $userService;
+    private SessionService $sessionService;
 
     public function __construct()
     {
         $connection = Database::getConnection();
         $userRepository = new UserRepository($connection);
         $this->userService = new UserService($userRepository);
+
+        $sessionRepository = new SessionRepository($connection);
+        $this->sessionService = new SessionService($sessionRepository, $userRepository);
     }
 
     public function register()
@@ -60,7 +66,8 @@ class UserController
         $request->password = $_POST['password'];
 
         try{
-            $this->userService->login($request);
+            $response = $this->userService->login($request);
+            $this->sessionService->create($response->user->id);
             View::redirect('/');
         }catch(ValidationException $exception){
             View::render('User/login', [
