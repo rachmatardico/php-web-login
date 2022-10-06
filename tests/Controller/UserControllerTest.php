@@ -8,21 +8,37 @@ namespace Matt\Php\Web\Login\App
     }
 }
 
+namespace Matt\Php\Web\Login\Service
+{
+    function setcookie(string $name, string $value)
+    {
+        echo "$name : $value";
+    }
+}
+
 namespace Matt\Php\Web\Login\Controller
 {
     use Matt\Php\Web\Login\Config\Database;
+    use Matt\Php\Web\Login\Domain\Session;
     use Matt\Php\Web\Login\Domain\User;
+    use Matt\Php\Web\Login\Repository\SessionRepository;
     use Matt\Php\Web\Login\Repository\UserRepository;
+    use Matt\Php\Web\Login\Service\SessionService;
     use PHPUnit\Framework\TestCase;
     
     class UserControllerTest extends TestCase
     {
         private UserController $userController;
         private UserRepository $userRepository;
+        private SessionRepository $sessionRepository;
     
         protected function setUp(): void
         {
             $this->userController = new UserController();
+
+            $this->sessionRepository = new SessionRepository(Database::getConnection());
+            $this->sessionRepository->deleteAll();
+            
             $this->userRepository = new UserRepository(Database::getConnection());
             $this->userRepository->deleteAll();
 
@@ -114,6 +130,7 @@ namespace Matt\Php\Web\Login\Controller
             $this->userController->postLogin();
 
             $this->expectOutputRegex("[Location: /]");
+            $this->expectOutputRegex("[X-PZN-SESSION : ]");
         }
 
         public function testLoginValidationError()
