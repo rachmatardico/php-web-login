@@ -177,5 +177,27 @@ namespace Matt\Php\Web\Login\Controller
             $this->expectOutputRegex("[Password]");
             $this->expectOutputRegex("[Id or Password is wrong]");
         }
+        
+        public function testLogout()
+        {
+            $user = new User();
+            $user->id = "matt";
+            $user->name = "rachmat";
+            $user->password = password_hash("password", PASSWORD_BCRYPT);
+            $this->userRepository->save($user);
+
+            $session = new Session();
+            $session->id = uniqid();
+            $session->userId = $user->id;
+
+            $this->sessionRepository->save($session);
+
+            $_COOKIE[SessionService::$COOKIE_NAME] = $session->id;
+
+            $this->userController->logout();
+
+            $this->expectOutputRegex("[Location: /]");
+            $this->expectOutputRegex("[X-PZN-SESSION : ]");
+        }
     }
 }
