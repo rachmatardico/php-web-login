@@ -4,16 +4,27 @@ namespace Matt\Php\Web\Login\Repository;
 
 use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Domain\Session;
+use Matt\Php\Web\Login\Domain\User;
 use PHPUnit\Framework\TestCase;
 
 class SessionRepositoryTest extends TestCase
 {
     private SessionRepository $sessionRepository;
+    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
+        $this->userRepository = new UserRepository(Database::getConnection());
         $this->sessionRepository = new SessionRepository(Database::getConnection());
+
         $this->sessionRepository->deleteAll();
+        $this->userRepository->deleteAll();
+
+        $user = new User();
+        $user->id = "matt";
+        $user->name = "Rachmat";
+        $user->password = "password";
+        $this->userRepository->save($user);
     }
 
     public function testSaveSuccess()
