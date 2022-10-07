@@ -199,5 +199,82 @@ namespace Matt\Php\Web\Login\Controller
             $this->expectOutputRegex("[Location: /]");
             $this->expectOutputRegex("[X-PZN-SESSION : ]");
         }
+
+        public function testUpdateProfile()
+        {
+            $user = new User();
+            $user->id = "matt";
+            $user->name = "rachmat";
+            $user->password = password_hash("password", PASSWORD_BCRYPT);
+            $this->userRepository->save($user);
+
+            $session = new Session();
+            $session->id = uniqid();
+            $session->userId = $user->id;
+
+            $this->sessionRepository->save($session);
+
+            $_COOKIE[SessionService::$COOKIE_NAME] = $session->id;
+
+            $this->userController->updateProfile();
+
+            $this->expectOutputRegex("[Profile]");
+            $this->expectOutputRegex("[Id]");
+            $this->expectOutputRegex("[matt]");
+            $this->expectOutputRegex("[Name]");
+            $this->expectOutputRegex("[rachmat]");
+
+        }
+
+        public function testPostUpdateProfileSuccess()
+        {
+            $user = new User();
+            $user->id = "matt";
+            $user->name = "rachmat";
+            $user->password = password_hash("password", PASSWORD_BCRYPT);
+            $this->userRepository->save($user);
+
+            $session = new Session();
+            $session->id = uniqid();
+            $session->userId = $user->id;
+
+            $this->sessionRepository->save($session);
+
+            $_COOKIE[SessionService::$COOKIE_NAME] = $session->id;
+
+            $_POST['name'] = "Budi";
+            $this->userController->postUpdateProfile();
+            
+            $this->expectOutputRegex("[Location: /]");
+
+            $result = $this->userRepository->findById("matt");
+            self::assertEquals("Budi", $result->name);
+        }
+
+        public function testPostUpdateProfileValidationError()
+        {
+            $user = new User();
+            $user->id = "matt";
+            $user->name = "rachmat";
+            $user->password = password_hash("password", PASSWORD_BCRYPT);
+            $this->userRepository->save($user);
+
+            $session = new Session();
+            $session->id = uniqid();
+            $session->userId = $user->id;
+
+            $this->sessionRepository->save($session);
+
+            $_COOKIE[SessionService::$COOKIE_NAME] = $session->id;
+
+            $_POST['name'] = "";
+            $this->userController->postUpdateProfile();
+            
+            $this->expectOutputRegex("[Profile]");
+            $this->expectOutputRegex("[Id]");
+            $this->expectOutputRegex("[matt]");
+            $this->expectOutputRegex("[Name]");
+            $this->expectOutputRegex("[Id, Name can't be blank!]");
+        }
     }
 }
