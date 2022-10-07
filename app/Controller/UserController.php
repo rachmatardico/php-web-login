@@ -6,6 +6,7 @@ use Matt\Php\Web\Login\App\View;
 use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Exception\ValidationException;
 use Matt\Php\Web\Login\Model\UserLoginRequest;
+use Matt\Php\Web\Login\Model\UserPasswordUpdateRequest;
 use Matt\Php\Web\Login\Model\UserProfileUpdateRequest;
 use Matt\Php\Web\Login\Model\UserRegisterRequest;
 use Matt\Php\Web\Login\Repository\SessionRepository;
@@ -117,6 +118,41 @@ class UserController
                         "id"    => $user->id,
                         "name"  => $_POST['name']
     
+                ]
+            ]);
+        }
+    }
+
+    public function updatePassword()
+    {
+        $user = $this->sessionService->current();
+        View::render('User/password', [
+            "title"     => "Update user password",
+            "user"      => [
+                    "id"    => $user->id
+            ]
+        ]);
+    }
+
+    public function postUpdatePassword()
+    {
+        $user = $this->sessionService->current();
+
+        $request = new UserPasswordUpdateRequest();
+        $request->id = $user->id;
+        $request->oldPassword = $_POST['oldPassword'];
+        $request->newPassword = $_POST['newPassword'];
+
+        try{
+            $this->userService->updatePassword($request);
+            View::redirect('/');
+        }catch(ValidationException $exception)
+        {
+            View::render('User/password', [
+                "title"     => "Update user password",
+                "error"     => $exception->getMessage(),
+                "user"      => [
+                        "id"    => $user->id
                 ]
             ]);
         }
