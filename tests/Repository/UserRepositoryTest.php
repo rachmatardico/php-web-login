@@ -10,9 +10,13 @@ class UserRepositoryTest extends TestCase
 {
 
     private UserRepository $userRepository;
+    private SessionRepository $sesionRepository;
 
     protected function setUp():void
     {
+        $this->sesionRepository = new SessionRepository(Database::getConnection());
+        $this->sesionRepository->deleteAll();
+
         $this->userRepository = new UserRepository(Database::getConnection());
         $this->userRepository->deleteAll();
     }
@@ -39,4 +43,21 @@ class UserRepositoryTest extends TestCase
         self::assertNull($user);
     }
 
+    public function testUpdate()
+    {
+        $user = new User();
+        $user->id = "matt";
+        $user->name = "rachmat";
+        $user->password = "rahasia";
+        $this->userRepository->save($user);
+        
+        $user->name = "Budi";
+        $this->userRepository->update($user);
+
+        $result = $this->userRepository->findById($user->id);
+
+        self::assertEquals($user->id, $result->id);
+        self::assertEquals($user->name, $result->name);
+        self::assertEquals($user->password, $result->password);
+    }
 }
