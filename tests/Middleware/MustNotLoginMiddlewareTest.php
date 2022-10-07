@@ -1,15 +1,7 @@
 <?php
-
-namespace Matt\Php\Web\Login\App
-{
-    function header(string $value)
-    {
-        echo $value;
-    }
-}
-
 namespace Matt\Php\Web\Login\Middleware
 {
+    require_once __DIR__ . "/../Helper/helper.php";
 
     use Matt\Php\Web\Login\Config\Database;
     use Matt\Php\Web\Login\Domain\Session;

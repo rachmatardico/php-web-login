@@ -2,18 +2,14 @@
 
 namespace Matt\Php\Web\Login\Service;
 
+require_once __DIR__ . "/../Helper/helper.php";
+
 use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Domain\Session;
 use Matt\Php\Web\Login\Domain\User;
 use Matt\Php\Web\Login\Repository\SessionRepository;
 use Matt\Php\Web\Login\Repository\UserRepository;
 use PHPUnit\Framework\TestCase;
-
-function setcookie(string $name, string $value)
-{
-    echo "$name : $value";
-}
-
 class SessionServiceTest extends TestCase
 {
     private SessionService $sessionService;
