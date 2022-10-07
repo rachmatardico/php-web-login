@@ -6,7 +6,7 @@ use Exception;
 use Matt\Php\Web\Login\Config\Database;
 use Matt\Php\Web\Login\Domain\User;
 use Matt\Php\Web\Login\Exception\ValidationException;
-use Matt\Php\Web\Login\Model\{UserLoginRequest, UserLoginResponse, UserProfileUpdateRequest, UserProfileUpdateResponse, UserRegisterRequest, UserRegisterResponse};
+use Matt\Php\Web\Login\Model\{UserLoginRequest, UserLoginResponse, UserPasswordUpdateRequest, UserPasswordUpdateResponse, UserProfileUpdateRequest, UserProfileUpdateResponse, UserRegisterRequest, UserRegisterResponse};
 use Matt\Php\Web\Login\Repository\UserRepository;
 
 class UserService
@@ -110,6 +110,43 @@ class UserService
         if ($request->id == null || $request->name == null || 
             trim($request->id) == "" || trim($request->name == "")) {
                 throw new ValidationException("Id, Name can't be blank!");
+        }
+    }
+
+    public function updatePassword(UserPasswordUpdateRequest $request):UserPasswordUpdateResponse
+    {
+        $this->validateUserPasswordUpdateRequest($request);
+        
+        try {
+            Database::beginTransaction();
+
+            $user = $this->userRepository->findById($request->id);
+            if ($user == null) {
+                throw new ValidationException("User is not found");
+            }
+
+            if (!password_verify($request->oldPassword, $user->password)) {
+                throw new ValidationException("Old password is wrong!");
+            }
+
+            $user->password = password_hash($request->newPassword, PASSWORD_BCRYPT);
+            $this->userRepository->update($user);
+            
+            Database::commitTransaction();
+
+            $response = new UserPasswordUpdateResponse();
+            $response->user = $user;
+            return $response;
+        }catch (Exception $exception){
+            Database::rollbackTransaction();
+            throw $exception;
+        }
+    }
+
+    private function validateUserPasswordUpdateRequest(UserPasswordUpdateRequest $request){
+        if ($request->id == null || $request->oldPassword == null || $request->newPassword == null || 
+            trim($request->id) == "" || trim($request->oldPassword) == "" || trim($request->newPassword == "")) {
+                throw new ValidationException("Id, Old Password, New Password can't be blank!");
         }
     }
 }
